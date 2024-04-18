@@ -1,28 +1,23 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const app = express();
+const express = require('express')
+const cors = require('cors')
+const database = require('./database/database')
+const {readdirSync} = require('fs')
+
+const app = express()
+
+require('dotenv').config()
+const PORT = process.env.PORT
 
 app.use(express.json())
+app.use(cors())
 
-app.get("/", (req, res) => {
-	res.send("Hello from node api server");
-});
+readdirSync('./routes').map((route) => app.use('/api', require('./routes/' + route)))
 
-app.post("/api/products", (req,res) => {
-    console.log(req.body)
-    res.send(req.body)
-})
-
-mongoose
-	.connect(
-		"mongodb+srv://marcelohespanholdias:hjC2z3rR7r1Jzswi@cluster0.ntelke5.mongodb.net/NODE_API?retryWrites=true&w=majority"
-	)
-	.then(() => {
-		console.log("Connected to Database!");
-		app.listen(3000, () => {
-			console.log("Server listening on port 3000");
-		});
+const server = () => {
+	database()
+	app.listen(PORT, () => {
+		console.log('Server listening on port:', PORT)
 	})
-	.catch((e) => {
-		console.log("Connection failed! " + e);
-	});
+}
+
+server()
